@@ -13,7 +13,7 @@ export default {
 
 <template>
     <main>
-        MAIN
+        <h1 class="text-center">Value Converter</h1>
     </main>
 </template>
 

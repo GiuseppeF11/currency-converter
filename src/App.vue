@@ -1,7 +1,5 @@
 <script>
-import AppHeader from './components/AppHeader.vue';
 import AppMain from './components/AppMain.vue';
-import AppFooter from './components/AppFooter.vue';
 import axios from 'axios';
 
 export default {
@@ -11,9 +9,7 @@ export default {
         };
     },
     components: {
-        AppHeader,
         AppMain,
-        AppFooter
     },  
     methods: {
 
@@ -29,15 +25,8 @@ export default {
 </script>
 
 <template>
-    <h1>
-        Mia App
-    </h1>
-
-    <AppHeader />
 
     <AppMain />
-
-    <AppFooter />
 </template>
 
 <style lang="scss">
