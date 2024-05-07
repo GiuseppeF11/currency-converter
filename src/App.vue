@@ -67,11 +67,11 @@ export default {
         },
 
         updateAmount2() {
-            if (this.currency_1 !== this.currency_2) {
-                const rate = this.response.rates[this.currency_2];
-                this.amount_2 = (parseFloat(this.amount_1) * rate).toFixed(2);
+            if (this.currency_1 !== this.currency_2) { // Verifico che le valute di partenza e destinazione siano diverse
+                const rate = this.response.rates[this.currency_2]; // Ottengo il tasso di conversione dalla risposta dell'API
+                this.amount_2 = (parseFloat(this.amount_1) * rate).toFixed(2); // Calcolo il valore convertito utilizzando il tasso e l'importo di partenza e lo arrotondo a 2 decimali
             } else {
-                this.amount_2 = this.amount_1;
+                this.amount_2 = this.amount_1; // Se le valute sono uguali, mantengo lo stesso valore
             }
         },
 
@@ -85,8 +85,8 @@ export default {
         },
 
         getCurrencySymbol(currencyCode) {
-            const currency = this.currencies.find(curr => curr.code === currencyCode);
-            return currency ? currency.symbol : '';
+            const currency = this.currencies.find(curr => curr.code === currencyCode); // Cerco la valuta corrispondente al codice della valuta specificato
+            return currency ? currency.symbol : '';  // Trovata la valuta, restituisci il simbolo della valuta, altrimenti restituisci una stringa vuota
         }
     },
     mounted() {
