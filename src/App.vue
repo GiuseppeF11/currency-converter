@@ -130,19 +130,21 @@ export default {
             <div class="row mb-3">
                 <input class="col block-left" type="text" v-model="formattedAmount1" @input="updateAmount2" placeholder="Inserisci il valore da convertire..." pattern="[0-9]*"> <!-- Ammette valori da 0 a 9 che possono essere ripetuti (*) -->
                 
-                <select class="col block-right" v-model="currency_1" @change="updateRequest"> <!-- change è un evento degli input che viene attivato se il valore dell'input cambia -->
-                    <option value="">Seleziona la valuta di partenza...</option>
-                    <option v-for="currency in currencies" :value="currency.code" :key="currency.code"> {{ currency.name }} </option>
+                <select class="col block-right" v-model="currency_1" @change="updateRequest">
+                    <option value="">Seleziona la valuta di partenza...</option>                        <!-- Disabilito l'opzione se è già presente nell'altra select -->
+                    <option v-for="currency in currencies" :value="currency.code" :key="currency.code" :disabled="currency.code === currency_2" :class="{ 'disabled-select': currency.code === currency_2 }"> {{ currency.name }} </option>
                 </select>
+                
             </div>
 
             <div class="row">
                 <input class="col block-left" type="text" v-model="formattedAmount2" @input="updateAmount1" placeholder="Inserisci il valore da convertire..." pattern="[0-9]*">
-
+                
                 <select class="col block-right" v-model="currency_2" @change="updateRequest">
-                    <option value="">Seleziona la valuta di destinazione...</option>
-                    <option v-for="currency in currencies" :value="currency.code" :key="currency.code"> {{ currency.name }} </option>
+                    <option value="">Seleziona la valuta di destinazione...</option>                    <!-- Disabilito l'opzione se è già presente nell'altra select -->
+                    <option v-for="currency in currencies" :value="currency.code" :key="currency.code" :disabled="currency.code === currency_1" :class="{ 'disabled-select': currency.code === currency_1 }"> {{ currency.name }} </option>
                 </select>
+                
             </div>
         </div>
     </div>
@@ -202,4 +204,11 @@ export default {
     min-height: 45px;
     font-weight: 600;
 }
+
+
+.disabled-select {
+    background-color: #b6cabb;
+    color: #999;
+}
+
 </style>
