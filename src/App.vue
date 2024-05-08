@@ -48,6 +48,25 @@ export default {
 
         };
     },
+    computed: { //La computed property viene ricalcolata solo quando una delle sue dipendenze viene modificata, quindi è molto reattiva
+        formattedAmount1: {
+            get() {
+                return isNaN(this.amount_1) ? '' : this.amount_1;
+            },
+            set(value) {
+                this.amount_1 = value;
+            }
+        },
+        formattedAmount2: {
+            get() {
+                return isNaN(this.amount_2) ? '' : this.amount_2;
+            },
+            set(value) {
+                this.amount_2 = value;
+            }
+        }
+    },
+
     methods: {
         //Definisco la funzione per aggiornare la conversione ad ogni digitazione
         updateRequest() {
@@ -101,27 +120,27 @@ export default {
         <div class="container">
             <AppMain />
             <h1 class="text-center primary fw-bold ">CURRENCY CONVERTER</h1>
-            <p class="secondary mb-1">
-                 {{ amount_1 }} {{ getCurrencySymbol(currency_1) }} è uguale a
+            <p class="secondary mb-1" >
+                <span v-if="!isNaN(amount_1)">{{ amount_1 }}</span>  {{ getCurrencySymbol(currency_1) }} è uguale a
             </p>
-            <h1 class="secondary" v-for="(currency, key) in response.rates" :key="key">
-                {{ amount_2 }} {{ getCurrencySymbol(currency_2) }}
+            <h1 class="secondary"  v-for="(currency, key) in response.rates" :key="key">
+                <span v-if="!isNaN(amount_2)"> {{ amount_2 }} </span>  {{ getCurrencySymbol(currency_2) }}
             </h1>
         
             <div class="row mb-3">
-                <input class="col block-left" type="text" v-model="amount_1" @input="updateAmount2" placeholder="Inserisci il valore da convertire...">
-            
-                <select class="col block-right" v-model="currency_1" @change="updateRequest">
-                    <option currency="">Seleziona la valuta di partenza...</option>
+                <input class="col block-left" type="text" v-model="formattedAmount1" @input="updateAmount2" placeholder="Inserisci il valore da convertire..." pattern="[0-9]*"> <!-- Ammette valori da 0 a 9 che possono essere ripetuti (*) -->
+                
+                <select class="col block-right" v-model="currency_1" @change="updateRequest"> <!-- change è un evento degli input che viene attivato se il valore dell'input cambia -->
+                    <option value="">Seleziona la valuta di partenza...</option>
                     <option v-for="currency in currencies" :value="currency.code" :key="currency.code"> {{ currency.name }} </option>
                 </select>
             </div>
-            
+
             <div class="row">
-                <input class="col block-left" type="text" v-model="amount_2" @input="updateAmount1" placeholder="Inserisci il valore da convertire...">
-    
+                <input class="col block-left" type="text" v-model="formattedAmount2" @input="updateAmount1" placeholder="Inserisci il valore da convertire..." pattern="[0-9]*">
+
                 <select class="col block-right" v-model="currency_2" @change="updateRequest">
-                    <option currency="">Seleziona la valuta di destinazione...</option>
+                    <option value="">Seleziona la valuta di destinazione...</option>
                     <option v-for="currency in currencies" :value="currency.code" :key="currency.code"> {{ currency.name }} </option>
                 </select>
             </div>
@@ -167,7 +186,7 @@ export default {
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     text-align: center;
-    font-size: 12px;
+    font-size: 15px;
     min-height: 45px;
     font-weight: 600;
 }
@@ -179,7 +198,7 @@ export default {
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
     text-align: center;
-    font-size: 12px;
+    font-size: 15px;
     min-height: 45px;
     font-weight: 600;
 }
