@@ -7,14 +7,13 @@ export default {
         AppMain,
     },
     data() {
-        const today = new Date().toISOString().slice(0, 10);
-        const oneMonthAgo = new Date();
+        const today = new Date().toISOString().slice(0, 10); //Prendo la data, la trasformo nel formato "AAAA-MM-GG THH:MM:SS.MSZ",  prendo soli i primi 10 caratteri quindi AAAA-MM-GG
+        const oneMonthAgo = new Date();                      //Prendo la data odierna, prendo il mese e lo riduco di uno (un mese prima appunto)
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
         const oneMonthAgoFormatted = oneMonthAgo.toISOString().slice(0, 10);
         return {
             response: {},
-            history_response: [],
-            valuesList: [],
+            history_response: {},
             amount_1: '1.00', // Assegno '1' come valore predefinito per l'input
             amount_2: '',
             currency_1: 'EUR', // Assegno EUR come valore predefinito per la select di partenza
@@ -56,11 +55,16 @@ export default {
         };
     },
     computed: { //La computed property viene ricalcolata solo quando una delle sue dipendenze viene modificata, quindi è molto reattiva
+        
         formattedAmount1: {
+            // Getter per ottenere il valore formattato
             get() {
+                // Restituisce il valore di amount_1 se è un numero, altrimenti restituisce una stringa vuota
                 return isNaN(this.amount_1) ? '' : this.amount_1;
             },
+            // Setter per impostare il valore di amount_1
             set(value) {
+                // Imposta il valore di amount_1 con il valore fornito
                 this.amount_1 = value;
             }
         },
@@ -75,68 +79,15 @@ export default {
     },
 
     methods: {
-        chart() {
-    // Estrai le date e i valori dalla history_response
-    const dates = Object.keys(this.history_response); console.log('DATE: ' , dates)
-    const values = Object.values(this.history_response).map(rate => parseFloat(rate.USD));
-
-    var options = {
-        series: [{
-            name: "Value",
-            data: this.valuesList,
-        }],
-        chart: {
-            height: 320,
-            type: 'area',
-            zoom: {
-                enabled: false
-            },
-        },
-        dataLabels: {
-            enabled: false,
-        },
-        stroke: {
-            curve: 'smooth'
-        },
-        title: {
-            text: "Rapporto delle valute nell' ultimo mese",
-            align: 'left',
-            style: {
-                color: '#A9D2B4' // Cambia il colore del titolo qui
-            }
-        },
-        xaxis: {
-            categories: dates, // Utilizza le date come categorie sull'asse x
-            labels: {
-                style: {
-                    colors: '#A9D2B4' // Cambia il colore delle etichette sull'asse x qui
-                }
-            }
-        },
-        yaxis: {
-            labels: {
-                style: {
-                    colors: '#A9D2B4' // Cambia il colore delle etichette sull'asse y qui
-                }
-            }
-        },
-        colors:['#39DA62']
-    };
-
-    var chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
-},
-
-
         //Definisco la funzione per aggiornare la conversione ad ogni digitazione
         updateRequest() {
-            // Chiamata API per il rapporto attuale
+            //QUERY URL per la chiamata del valore di base
             const currentUrl = 'https://api.frankfurter.app/latest?amount=' +
                 this.amount_1 +
                 '&from=' + this.currency_1 +
                 '&to=' + this.currency_2;
 
-            // Chiamata API per il rapporto dell'ultimo mese
+            //QUERY URL per la chiamata della cronologia del tasso nell'ultimo mese
             const historyUrl = `https://api.frankfurter.app/${this.oneMonthAgo}..${this.today}?from=${this.currency_1}&to=${this.currency_2}`;
 
             axios.all([
@@ -154,15 +105,15 @@ export default {
                     console.log(historyRes.data.rates)
 
                     this.history_response = historyRes.data.rates
-                    this.valuesList = valuesArray
 
-                    // Stampa l'array dei valori numerici
-                    /* console.log('Valori delle variazioni durante l\'ultimo mese:', this.history_response); */
+                    // Chiamata chart solo quando i dati sono pronti
+                    this.chart();
                 }))
                 .catch((error) => {
                     console.error('Errore durante le richieste API:', error);
                 });
         },
+
         updateAmount2() {
             if (this.currency_1 !== this.currency_2) { // Verifico che le valute di partenza e destinazione siano diverse
                 const rate = this.response.rates[this.currency_2]; // Ottengo il tasso di conversione dalla risposta dell'API
@@ -184,14 +135,108 @@ export default {
         getCurrencySymbol(currencyCode) {
             const currency = this.currencies.find(curr => curr.code === currencyCode); // Cerco la valuta corrispondente al codice della valuta specificato
             return currency ? currency.symbol : '';  // Trovata la valuta, restituisci il simbolo della valuta, altrimenti restituisci una stringa vuota
+        },
+
+        chart() {
+            var lastMonth = [];
+            var values = [];
+
+            Object.keys(this.history_response).forEach(date => {
+                // Trasformo la data nel formato desiderato (giorno mese)
+                const formattedDate = formatDate(date);
+
+                // Aggiungo la data formattata alle categorie
+                lastMonth.push(formattedDate);
+
+                // Aggiungo il valore della valuta come stringa ai dati della serie
+                values.push(String(this.history_response[date][this.currency_2]));
+            });
+
+            // Funzione per formattare la data nel formato "giorno mese"
+            function formatDate(dateString) {
+                // Divide la stringa della data in parti separate da "-"
+                const dateParts = dateString.split("-");
+                // Estrae l'anno, il mese e il giorno dalle parti della data
+                const year = dateParts[0];
+                const month = dateParts[1];
+                const day = dateParts[2];
+                // Crea un nuovo oggetto Data usando l'anno, il mese (sottraendo 1 poiché i mesi in JavaScript sono indicizzati da 0) e il giorno
+                const dateObject = new Date(year, month - 1, day);
+                // Ottiene il giorno del mese dalla data
+                const formattedDay = dateObject.getDate();
+                // Ottiene il nome del mese dalla data, utilizzando la formattazione specificata per la lingua italiana
+                const formattedMonth = new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(dateObject);
+                // Restituisce una stringa nel formato "giorno mese" (ad esempio, "1 gennaio")
+                return `${formattedDay} ${formattedMonth}`;
+            }
+
+            console.log("Categorie sull'asse x:", lastMonth);
+            console.log("Dati della serie:", values);
+
+    var options = {
+        series: [{
+            name: "Value",
+            data: values,
+        }],
+        chart: {
+            height: 350,
+            type: 'area',
+            zoom: {
+                enabled: false
+            },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        title: {
+            text: "Rapporto delle valute nell' ultimo mese",
+            align: 'left',
+            style: {
+                color: '#A9D2B4' // Cambia il colore del titolo qui
+            }
+        },
+        xaxis: {
+            categories: lastMonth,
+            labels: {
+                style: {
+                    colors: '#A9D2B4' // Cambia il colore delle etichette sull'asse x qui
+                }
+            }
+        },
+        yaxis: {
+            labels: {
+                style: {
+                    colors: '#A9D2B4' // Cambia il colore delle etichette sull'asse y qui
+                }
+            }
+        },
+        colors:['#39DA62']
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+    // Esegui un aggiornamento forzato del grafico dopo una breve pausa
+    setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, 100);
+        },
+    },
+    watch: {
+        currency_1(newValue, oldValue) {
+            this.updateRequest();
+        },
+        currency_2(newValue, oldValue) {
+            this.updateRequest();
         }
     },
+
     mounted() {
         // Al caricamento della pagina effettuo subito una chiamata con i valori di default
         this.updateRequest();
         this.chart();
-        console.log(this.today)
-        console.log(this.oneMonthAgo)
     }
 };
 </script>
@@ -212,7 +257,7 @@ export default {
                 </h1>
             </section>
         
-            <section>
+            <section class="px-3">
                 <!-- VALORE DA CONVERTIRE -->
                 <div class="row mb-3">
                     <input class="col block-left" type="text" v-model="formattedAmount1" @input="updateAmount2" placeholder="Inserisci il valore da convertire..." pattern="[0-9]*"> <!-- Ammette valori da 0 a 9 che possono essere ripetuti (*) -->
@@ -265,8 +310,9 @@ export default {
 .body {
     background-color: #343434;
     min-height: 100vh;
-    padding: 1rem 2rem;
+    display: flex;
     font-family: "Roboto Condensed", sans-serif;
+    padding: 10px 0;
 }
 
 .container {
@@ -274,6 +320,9 @@ export default {
     border-radius: 10px;
     padding: 20px;
     max-width: 50vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 
