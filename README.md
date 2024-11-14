@@ -1,7 +1,7 @@
-# Vue 3 + Vite
+💵Currency Converter💵
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+🏦Data is updated directly from the European Central Bank via API call to 'Frankfurter.app'🏦
 
-## Recommended IDE Setup
+💱It is possible to convert bilaterally and select different types of currencies.💱
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+📈There is also a preview of the currency rate trend in the previous month📉
